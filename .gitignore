@@ -1,0 +1,7 @@
+output/*
+__pycache__
+environement/*
+!environement/.env.example
+!environement/EXAMPLE.json
+*.ipynb
+lib
