@@ -237,7 +237,7 @@ def generate_patch_report(group_data, group_name, split=False):
                         counter_error += 1
         os.chmod("output/" + filename, 0o777)
         if counter_error > 0:
-            logger.error(f"\n /!\\ Error writing {counter_error} lines to file /!\\ ")
+            logger.error(f"/!\\ Error writing {counter_error} lines to file /!\\ ")
 
 
 def generate_security_issue_report(group_data, group_name, split=False):

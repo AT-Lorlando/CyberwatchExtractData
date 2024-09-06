@@ -119,7 +119,7 @@ def process_server(
         process_cve_announcements(server, cve_announcements, cwes_data, capec_data)
 
         logger.info(
-            f"\n{server.hostname} got {len(server.cves)} cve->affected packages for {len(server_packages)} packages"
+            f"{server.hostname} got {len(server.cves)} cve->affected packages for {len(server_packages)} packages"
         )
         return server
 
@@ -279,7 +279,7 @@ def process_cve_announcements(
             and "DO NOT USE THIS CANDIDATE NUMBER" in cve_announcement["content"]
         ):
             logger.info(
-                f"\n{cve_announcement['cve_code']} is rejected.\n{cve_announcement['content']}"
+                f"{cve_announcement['cve_code']} is rejected.\n{cve_announcement['content']}"
             )
             continue
 
@@ -289,7 +289,7 @@ def process_cve_announcements(
                 cve.populate_cwes_data(cwes_data, capec_data)
             except Exception as e:
                 logger.error(
-                    f"\nError during populate_cwes_data of CVE {cve.cve_code} for server {server.hostname}\n",
+                    f"Error during populate_cwes_data of CVE {cve.cve_code} for server {server.hostname}\n",
                     exc_info=True,
                 )
                 logger.info(cve)
@@ -297,7 +297,7 @@ def process_cve_announcements(
                 cve.populate_environmental_vector(server)
             except Exception as e:
                 logger.error(
-                    f"\nError during populate_environmental_vector of CVE {cve.cve_code} for server {server.hostname}: {e}\n",
+                    f"Error during populate_environmental_vector of CVE {cve.cve_code} for server {server.hostname}: {e}\n",
                     exc_info=True,
                 )
                 logger.info(cve)
@@ -305,7 +305,7 @@ def process_cve_announcements(
                 cve.compute()
             except Exception as e:
                 logger.error(
-                    f"\nError during computing of CVE {cve.cve_code} for server {server.hostname}: {e}\n",
+                    f"Error during computing of CVE {cve.cve_code} for server {server.hostname}: {e}\n",
                     exc_info=True,
                 )
                 logger.info(cve)

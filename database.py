@@ -178,14 +178,15 @@ def fetch_cve_for_server(
     Args:
         connection (pymysql.connections.Connection): The database connection object.
         server_id (int): The ID of the server for which to fetch CVEs.
-        days (int, optional): The number of days to filter CVEs by. Defaults to 0.
+        date_from (str, optional): The start date to filter CVEs by. Defaults to None.
+        date_to (str, optional): The end date to filter CVEs by. Defaults to None.
 
     Returns:
         Optional[List[Dict[str, Any]]]: A list of dictionaries representing the CVEs, or None if an error occurs.
     """
     try:
         with connection.cursor() as cursor:
-            sql = _build_cve_query(server_id, days)
+            sql = _build_cve_query(server_id, date_from=date_from, date_to=date_to)
             cursor.execute(sql)
             results = cursor.fetchall()
             return _process_cve_results(results)
@@ -194,13 +195,14 @@ def fetch_cve_for_server(
         return None
 
 
-def _build_cve_query(server_id: int, days: int) -> str:
+def _build_cve_query(server_id: int, date_from: str = None, date_to: str = None) -> str:
     """
     Builds the SQL query for fetching CVEs for a specific server.
 
     Args:
         server_id (int): The ID of the server for which to build the query.
-        days (int): The number of days to filter CVEs by.
+        date_from (str, optional): The start date to filter CVEs by. Defaults to None.
+        date_to (str, optional): The end date to filter CVEs by. Defaults to None.
 
     Returns:
         str: The SQL query string.
@@ -239,8 +241,9 @@ def _build_cve_query(server_id: int, days: int) -> str:
     LEFT JOIN cve_references ON cve_announcements.id = cve_references.cve_announcement_id
     LEFT JOIN sas_cves ON cve_announcements.id = sas_cves.cve_announcement_id
     WHERE server_cves.server_id = {server_id}
-    { "AND " + " AND ".join(where_clauses) if where_clauses else "" }
     AND server_cves.active = 1
+    { "AND " + " AND ".join(where_clauses) if where_clauses else "" }
+    GROUP BY cve_announcements.id
     """
     return base_query
 

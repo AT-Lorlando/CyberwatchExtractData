@@ -68,7 +68,6 @@ def main(
         os.makedirs("output")
         os.chmod("output", 0o777)
     for group in group_ids:
-        print(f"Getting data for the last {days} days") if days else None
         generate_report(
             group,
             date_from=date_from,
