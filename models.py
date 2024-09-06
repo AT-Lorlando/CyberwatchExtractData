@@ -533,18 +533,18 @@ class Cve:
     def compute_correctif(self):
         try:
             self.correctif = (
-                f"Apply update {self.update.target.product}:{self.update.target.version}"
+                f">= {self.update.target.version}"
                 if self.update is not None
                 and self.update.target is not None
                 and self.update.target.version
                 else (
-                    f"Upgrade {self.update.target.product} to last version"
+                    f"N/A"
                     if self.update is not None and self.update.target is not None
                     else None
                 )
             )
             if self.correctif is None:
-                self.correctif = "No solution found"
+                self.correctif = "N/A"
         except Exception as e:
             raise Exception("Error computing correctif for ", self.cve_code, e)
 

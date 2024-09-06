@@ -1,5 +1,5 @@
 CVE_REPORT = {
-    "Headers": "Published Date;Last Reviewed Date;Domain;Surface;Server;CVE Code;CVSS Score;CVSS Temporal Score;CVSS Environmental Score;CVSS Computed Score;Criticity;Component;Product;Version;Update;Score EPSS;Maturity;Content;Vector;Environmental Vector;Temporal Vector;CWE Code;Related CWEs;Related CAPECs;Related ATK;Cisa Reference;CertFR References",
+    "Headers": "Published Date;Last Reviewed Date;Domain;Surface;Server;CVE Code;CVSS Score;CVSS Temporal Score;CVSS Environmental Score;CVSS Computed Score;Criticity;Component;Product;Version;Patch;Score EPSS;Maturity;Content;Vector;Environmental Vector;Temporal Vector;CWE Code;Related CWEs;Related CAPECs;Related ATK;Cisa Reference;CertFR References",
 }
 
 
