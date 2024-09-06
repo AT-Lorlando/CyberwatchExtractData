@@ -8,7 +8,7 @@ Ce script Python est conçu pour extraire des données sous formes de CSV d'une 
 
 - Python 3.x
 - Accès à la base de données d'une instance Cyberwatch via un conteneur Docker et configuré en tant que master.
-- PyMySQL, CVSS, PyTz
+- PyMySQL, CVSS, PyTz, Datetime
 
 ### Pourquoi et comment configurer Cyberwatch en tant que master
 
@@ -37,7 +37,8 @@ python main.py
 
 - `-h, --help` : Affiche l'aide.
 - `-g, --group <group_ids>` : Identifiant(s) du groupe pour lequel générer le rapport.
-- `-d, --days <days_number>` : Nombre de jours pour récupérer les données CVE, 0 pour tout le temps.
+- `-from <date>` : Date de début pour la période de rapport (Format : DD/MM/YYYY).
+- `-to <date>` : Date de fin pour la période de rapport (Format : DD/MM/YYYY).
 - `-i, --instance <ip>` : Adresse IP de l'instance Cyberwatch à utiliser.
 - `-c, --config <path/to/config/file>` : Spécifie un fichier de configuration environnementale.
 - `-l, --list` : Liste tous les groupes de l'instance, n'oubliez pas de spécifier l'adresse IP de l'instance.
@@ -45,10 +46,10 @@ python main.py
 
 ### Exemples
 
-Pour générer un rapport CVE des 30 derniers jours pour un groupe de serveurs spécifique:
+Pour générer un rapport CVE depuis 1e Janvier 2024 pour un groupe de serveurs spécifique:
 
 ```bash
-python main.py -g 6 -d 30 -i 172.0.0.1
+python main.py -g 6 -from 01/01/2024 -i 172.0.0.1
 ```
 
 Pour générer un rapport pour un groupe de serveurs spécifique, avec une configuration environnementale spécifique et en générant un rapport séparé pour chaque serveur:
