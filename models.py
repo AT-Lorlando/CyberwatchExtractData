@@ -944,7 +944,7 @@ def get_temporal_vectors_from_cve_and_remediation(cve):
 
     try:
         temporal_vectors += CVSS_MAP["RL"][
-            1 if cve.correctif.startswith(("KB", "Apply")) else 4
+            1 if cve.correctif.startswith(("KB", ">=")) else 4
         ]
     except KeyError as e:
         raise Exception(
