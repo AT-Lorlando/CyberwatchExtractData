@@ -281,7 +281,10 @@ class Cve:
             #    }
             #    self.cvss_vector = cvss_vector_dict_to_string(cvss_dict_vector, 4)
             #    self.cvss_version = 4
-            if cve_announcement.get("cvss_v3_id"):
+            if cve_announcement.get("cvss_v4"):
+                self.cvss_vector = cve_announcement.get("cvss_v4")
+                self.cvss_version = 4
+            elif cve_announcement.get("cvss_v3_id"):
                 cvss_dict_vector = {
                     "AV": cve_announcement.get("access_vector"),
                     "AC": cve_announcement.get("access_complexity"),
@@ -408,7 +411,9 @@ class Cve:
         try:
             self.temporal_vectors = get_temporal_vectors_from_cve_and_remediation(self)
             self.full_cvss_vector = (
-                self.cvss_vector + self.environmental_vector + self.temporal_vectors
+                (self.cvss_vector + self.environmental_vector + self.temporal_vectors)
+                if self.cvss_version != 4
+                else self.cvss_vector
             )
             # Two get_cvss_env_from_vector because CVSS library return:
             # [X,Y,Z] with: X = Score with base vectors
@@ -435,13 +440,6 @@ class Cve:
         except Exception as e:
             raise Exception(
                 "Error computing score env for CVE: " + self.cve_code,
-                self.cvss_vector,
-                self.temporal_vectors,
-                self.scores,
-                self.computed_score,
-                self.severity,
-                self.update.current.__str__(),
-                self.update.current.cves_number,
                 e,
             )
 
@@ -929,7 +927,7 @@ def get_temporal_vectors_from_cve_and_remediation(cve):
     Returns:
         str: The temporal vectors.
     """
-    if cve.cvss_version == 0:
+    if cve.cvss_version == 0 or cve.cvss_version == 4:
         return ""
 
     CVSS_MAP = {3: CVSS3_MAP, 2: CVSS2_MAP}.get(cve.cvss_version, {})
