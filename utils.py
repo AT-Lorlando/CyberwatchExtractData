@@ -17,3 +17,10 @@ def print_progress_bar(
     )
     if iteration == total:
         print("")
+
+
+def parse_date(date_string: str) -> datetime:
+    try:
+        return datetime.datetime.strptime(date_string, "%d/%m/%Y").date()
+    except ValueError:
+        raise ValueError(f"Date {date_string} is not in the format dd/mm/yyyy")

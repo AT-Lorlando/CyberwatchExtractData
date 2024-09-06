@@ -167,7 +167,10 @@ def _get_group_name_with_db_specified(
 
 
 def fetch_cve_for_server(
-    connection: pymysql.connections.Connection, server_id: int, days: int = 0
+    connection: pymysql.connections.Connection,
+    server_id: int,
+    date_from: str = None,
+    date_to: str = None,
 ) -> Optional[List[Dict[str, Any]]]:
     """
     Fetches a list of CVEs for a specific server.
@@ -202,6 +205,19 @@ def _build_cve_query(server_id: int, days: int) -> str:
     Returns:
         str: The SQL query string.
     """
+    where_clauses = []
+    if date_from and date_to:
+        where_clauses.append(
+            f"(cve_announcements.published_date BETWEEN '{date_from}' AND '{date_to}') OR (cve_announcements.last_modified_date BETWEEN '{date_from}' AND '{date_to}') OR (cve_announcements.published IS NULL AND cve_announcements.updated_at BETWEEN '{date_from}' AND '{date_to}')"
+        )
+    elif date_from:
+        where_clauses.append(
+            f"(cve_announcements.published_date >= '{date_from}' OR cve_announcements.last_modified_date >= '{date_from}' OR (cve_announcements.published IS NULL AND cve_announcements.updated_at >= '{date_from}'))"
+        )
+    elif date_to:
+        where_clauses.append(
+            f"(cve_announcements.published_date <= '{date_to}' OR cve_announcements.last_modified_date <= '{date_to}' OR (cve_announcements.published IS NULL AND cve_announcements.updated_at <= '{date_to}'))"
+        )
     base_query = f"""
     SELECT cve_announcements.*, cvss_v3.*, 
     cvss.access_vector AS cvss_access_vector,
@@ -223,18 +239,10 @@ def _build_cve_query(server_id: int, days: int) -> str:
     LEFT JOIN cve_references ON cve_announcements.id = cve_references.cve_announcement_id
     LEFT JOIN sas_cves ON cve_announcements.id = sas_cves.cve_announcement_id
     WHERE server_cves.server_id = {server_id}
+    { "AND " + " AND ".join(where_clauses) if where_clauses else "" }
     AND server_cves.active = 1
     """
-    if days:
-        date_filter = f"""
-        AND (
-            cve_announcements.published IS NOT NULL and (DATEDIFF(CURDATE(), cve_announcements.published) <= {days} OR DATEDIFF(CURDATE(), cve_announcements.last_modified) <= {days})
-            OR
-            cve_announcements.published IS NULL and (DATEDIFF(CURDATE(), cve_announcements.updated_at) <= {days})
-        )
-        """
-        return base_query + date_filter + " GROUP BY cve_announcements.id;"
-    return base_query + " GROUP BY cve_announcements.id;"
+    return base_query
 
 
 def _process_cve_results(results: List[Dict[str, Any]]) -> List[Dict[str, Any]]:

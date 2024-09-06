@@ -19,7 +19,8 @@ logger = setup_logger(__name__)
 
 def generate_report(
     group,
-    days=0,
+    date_from=None,
+    date_to=None,
     capec_data={},
     cwes_data={},
     environmental_configuration={},
@@ -40,7 +41,8 @@ def generate_report(
     """
     group_data, group_name = get_cves_data_for_group(
         group,
-        days=days,
+        date_from=date_from,
+        date_to=date_to,
         capec_data=capec_data,
         cwes_data=cwes_data,
         environmental_configuration=environmental_configuration,

@@ -6,6 +6,7 @@ from database import (
 from config import load, parse
 from xml_parsers import parse_capec_xml_to_dict, parse_cwe_xml_to_dict
 from report_generator import generate_report
+from utils import parse_date
 
 
 def help():
@@ -16,35 +17,36 @@ def help():
     print("-h, --help: show this help message")
     print("-g, --group <group_ids>: group id to get the cve data for")
     print(
-        "-d, --days <days_number>: number of days to get the cve data for, keep it 0 for all time"
+        "-from <date>: specify the start date for the report, format dd/mm/yyyy, default is none"
+    )
+    print(
+        "-to <date>: specify the end date for the report, format dd/mm/yyyy, default is none"
     )
     print("-i, --instance <ip>: ip of the cyberwatch instance to use, choose wisely")
     print(
         "-c, --config <path/to/config/file>: Specify an environmental configuration file based on ./environment/example.json format"
     )
     print("-l, --list: list of all groups, don't forget to specify the instance IP.")
-    print("-lrt, --list-report-type: list of all cve report types")
     print(
         "-s, --split, split the report for each server in the group in multiple files"
     )
-    print("Example: python main.py -g 6 -d 30 -i 172.0.0.1 --cve-report 0")
+    print("Example: python main.py -g 6 -from 01/01/2024 -i 172.0.0.1")
     print(
-        "\t Generate a report for group 6 for the last 30 days using the cyberwatch instance at 172.0.0.1"
+        "\t Generate a report for group 6 with data from 01/01/2024 using the cyberwatch instance at 172.0.0.1"
     )
     print("Example: python main.py -g 6 -i 172.0.0.1 -c ./environment/my_env.json")
-    print(
-        "\t Generate a report for group 6 days using the cyberwatch instance at 172.0.0.1"
-    )
+    print("\t Generate a report for group 6 using the cyberwatch instance at 172.0.0.1")
     print("Example: python main.py -i 172.0.0.1 -g 1,2,3,4")
     print(
-        "\t Generate a report for group 1,2,3,4 days using the cyberwatch instance at 172.0.0.1"
+        "\t Generate a report for group 1,2,3,4 using the cyberwatch instance at 172.0.0.1"
     )
     sys.exit(1)
 
 
 def main(
     group_ids,
-    days,
+    date_from,
+    date_to,
     cbw_conf,
     env_conf_file,
     flag_split=False,
@@ -69,7 +71,8 @@ def main(
         print(f"Getting data for the last {days} days") if days else None
         generate_report(
             group,
-            days=days,
+            date_from=date_from,
+            date_to=date_to,
             capec_data=capec_data,
             cwes_data=cwes_data,
             environmental_configuration=environmental_configuration,
@@ -81,11 +84,12 @@ def main(
 if __name__ == "__main__":
     args = sys.argv[1:]
     group_ids = []
-    days = 0
     instance = ""
     group_list_flag = False
     flag_split = False
     env_conf_file = ""
+    date_from = None
+    date_to = None
     if len(args) == 0:
         help()
     for i in range(len(args)):
@@ -97,8 +101,6 @@ if __name__ == "__main__":
                 group_ids = [int(x) for x in group_ids.split(",")]
             else:
                 group_ids = [int(group_ids)]
-        elif args[i] in ["-d", "--days"]:
-            days = int(args[i + 1])
         elif args[i] in ["-i", "--instance"]:
             instance = args[i + 1]
         elif args[i] in ["-c", "--config"]:
@@ -107,6 +109,18 @@ if __name__ == "__main__":
             group_list_flag = True
         elif args[i] in ["-s, --split"]:
             flag_split = True
+        elif args[i] in ["-from"]:
+            try:
+                date_from = parse_date(args[i + 1])
+            except ValueError as e:
+                logger.error("Error parsing date from", exc_info=e)
+                sys.exit(1)
+        elif args[i] in ["-to"]:
+            try:
+                date_to = parse_date(args[i + 1])
+            except ValueError as e:
+                logger.error("Error parsing date to", exc_info=e)
+                sys.exit(1)
         env = parse("environement/.env")
     cbw_conf = {
         "host": instance,
@@ -119,9 +133,6 @@ if __name__ == "__main__":
         exit()
     if not len(group_ids):
         print("Group id is required")
-        help()
-    if days < 0:
-        print("Invalid days")
         help()
     if not env_conf_file:
         print("#####################################################")
@@ -145,7 +156,8 @@ if __name__ == "__main__":
 
     main(
         group_ids,
-        days,
+        date_from,
+        date_to,
         cbw_conf,
         env_conf_file,
         flag_split,

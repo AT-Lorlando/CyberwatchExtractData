@@ -10,7 +10,8 @@ logger = setup_logger(__name__)
 
 def get_cves_data_for_group(
     group_id: int,
-    days: int = 0,
+    date_from: str = None,
+    date_to: str = None,
     capec_data: Dict = {},
     cwes_data: Dict = {},
     environmental_configuration: Dict = {},
@@ -21,7 +22,8 @@ def get_cves_data_for_group(
 
     Args:
         group_id (int): The ID of the group.
-        days (int, optional): The number of days to consider for the data retrieval. Defaults to 0.
+        date_from (str, optional): The start date for the data retrieval. Defaults to None.
+        date_to (str, optional): The end date for the data retrieval. Defaults to None.
         capec_data (Dict, optional): The CAPEC data. Defaults to an empty dictionary.
         cwes_data (Dict, optional): The CWEs data. Defaults to an empty dictionary.
         environmental_configuration (Dict, optional): The environmental configuration data. Defaults to an empty dictionary.
@@ -49,7 +51,8 @@ def get_cves_data_for_group(
                 cwes_data,
                 environmental_configuration,
                 configuration_cyberwatch,
-                days,
+                date_from,
+                date_to,
             )
             for server in servers_data
         ]
@@ -68,7 +71,8 @@ def process_server(
     cwes_data: Dict,
     environmental_configuration: Dict,
     configuration_cyberwatch: Dict,
-    days: int,
+    date_from: str = None,
+    date_to: str = None,
 ) -> Server:
     """
     Process server data and return a Server object.
@@ -80,7 +84,8 @@ def process_server(
         cwes_data (Dict): The CWEs data.
         environmental_configuration (Dict): The environmental configuration.
         configuration_cyberwatch (Dict): The Cyberwatch configuration.
-        days (int): The number of days.
+        date_from (str, optional): The start date for the data retrieval. Defaults to None.
+        date_to (str, optional): The end date for the data retrieval. Defaults to None.
 
     Returns:
         Server: The processed Server object.
@@ -90,7 +95,7 @@ def process_server(
         server = initialize_server(server_data, environmental_configuration)
         server_packages = database.fetch_packages_for_server(connection, server.id)
         cve_announcements = database.fetch_cve_for_server(
-            connection, server.id, days=days
+            connection, server.id, date_from=date_from, date_to=date_to
         )
         server_updates = database.fetch_server_updates_for_cve(connection, server.id)
         server_current_affected_packages = (
