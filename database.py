@@ -210,15 +210,15 @@ def _build_cve_query(server_id: int, date_from: str = None, date_to: str = None)
     where_clauses = []
     if date_from and date_to:
         where_clauses.append(
-            f"(cve_announcements.published_date BETWEEN '{date_from}' AND '{date_to}') OR (cve_announcements.last_modified_date BETWEEN '{date_from}' AND '{date_to}') OR (cve_announcements.published IS NULL AND cve_announcements.updated_at BETWEEN '{date_from}' AND '{date_to}')"
+            f"(cve_announcements.published BETWEEN '{date_from}' AND '{date_to}') OR (cve_announcements.last_modified BETWEEN '{date_from}' AND '{date_to}') OR (cve_announcements.published IS NULL AND cve_announcements.updated_at BETWEEN '{date_from}' AND '{date_to}')"
         )
     elif date_from:
         where_clauses.append(
-            f"(cve_announcements.published_date >= '{date_from}' OR cve_announcements.last_modified_date >= '{date_from}' OR (cve_announcements.published IS NULL AND cve_announcements.updated_at >= '{date_from}'))"
+            f"(cve_announcements.published >= '{date_from}' OR cve_announcements.last_modified >= '{date_from}' OR (cve_announcements.published IS NULL AND cve_announcements.updated_at >= '{date_from}'))"
         )
     elif date_to:
         where_clauses.append(
-            f"(cve_announcements.published_date <= '{date_to}' OR cve_announcements.last_modified_date <= '{date_to}' OR (cve_announcements.published IS NULL AND cve_announcements.updated_at <= '{date_to}'))"
+            f"(cve_announcements.published <= '{date_to}' OR cve_announcements.last_modified <= '{date_to}' OR (cve_announcements.published IS NULL AND cve_announcements.updated_at <= '{date_to}'))"
         )
     base_query = f"""
     SELECT cve_announcements.*, cvss_v3.*, 
