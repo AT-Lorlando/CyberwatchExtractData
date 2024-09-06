@@ -348,7 +348,8 @@ class Cve:
         self.full_cvss_vector = ""
         self.severity = None
 
-        self.cisa_flag = False
+        self.cisa_exploit_at = cve_announcement.get("cisa_exploit_add_at")
+        self.cisa_flag = True if self.cisa_exploit_at else False
         self.references_code = None
         self.related_cwes = []
         self.related_capecs = []
@@ -471,8 +472,6 @@ class Cve:
         try:
             self.references_code = ""
             for ref in self.references:
-                if "CISA" in ref.get("source", ""):
-                    self.cisa_flag = True
                 self.references_code += (
                     ref.get("code", "") + " " if "CERTFR" in ref.get("code", "") else ""
                 )
