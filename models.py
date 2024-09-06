@@ -417,12 +417,12 @@ class Cve:
             # Or, we want a Y' = Score with base + env vector
             # So we need to compute a score without temp vector
             self.scores = get_cvss_env_from_vector(
-                self.cvss_vector + self.environmental_vector
+                self.cvss_vector, self.environmental_vector
             )
-            self.environmental_score = (
-                self.scores[2] if self.scores[2] else self.temporal_score
+            self.environmental_score = self.scores[2] if self.scores[2] else self.score
+            self.scores = get_cvss_env_from_vector(
+                self.cvss_vector, self.environmental_vector, self.temporal_vectors
             )
-            self.scores = get_cvss_env_from_vector(self.full_cvss_vector)
 
             self.score = self.scores[0] if self.scores[0] else self.score
             self.temporal_score = self.scores[1] if self.scores[1] else self.score
@@ -818,7 +818,7 @@ def array_to_string(array, separator="", field="", prefix="", suffix=""):
     return separator.join([f"{prefix}{item}{suffix}" for item in array]).strip()
 
 
-def get_cvss_env_from_vector(vector):
+def get_cvss_env_from_vector(vector, env_vector="", temp_vector=""):
     """
     Extracts CVSS scores from a given vector.
 
@@ -828,18 +828,26 @@ def get_cvss_env_from_vector(vector):
     Returns:
         list: A list of CVSS scores.
     """
+    scores = []
     if not vector:
         return ["Undefined", "Undefined", "Undefined"]
 
     if vector.startswith("CVSS:3"):
-        c = cvss.CVSS3(vector)
+        c = cvss.CVSS3(vector + env_vector + temp_vector)
+        scores = [s for s in c.scores()]
     elif vector.startswith("CVSS:4"):
         c = cvss.CVSS4(vector)
+        scores = [s for s in c.scores()]
         return [c.base_score, c.base_score, c.base_score]
     else:
-        c = cvss.CVSS2(vector)
+        c = cvss.CVSS2(vector + env_vector + temp_vector)
+        scores = [s for s in c.scores()]
+        if not temp_vector and not scores[1]:
+            scores[1] = scores[0]
+        if not env_vector and not scores[2]:
+            scores[2] = scores[0]
 
-    return c.scores()
+    return scores
 
 
 def get_environmental_cvss_vector_from_domain(configuration, domain):
